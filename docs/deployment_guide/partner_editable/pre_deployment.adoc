@@ -1,3 +1,186 @@
 //Include any predeployment steps here, such as signing up for a Marketplace AMI or making any changes to a partner account. If there are no predeployment steps, leave this file empty.
 
 == Predeployment steps
+
+// Optional based on Marketplace listing. Not to be edited
+
+=== Subscribe to the {partner-product-short-name} AMI
+
+This Partner Solution requires a subscription to the AMI for {partner-product-short-name} in AWS Marketplace.
+
+. Sign in to your AWS account.
+. https://aws.amazon.com/marketplace/pp/prodview-nlakutvltzij4[Open the page for the {partner-product-short-name} AMI in AWS Marketplace^], and then choose *Continue to Subscribe*.
+. Review the terms and conditions for software usage, and then choose *Accept Terms*. A confirmation page loads, and an email confirmation is sent to the account owner. For detailed subscription instructions, see the https://aws.amazon.com/marketplace/help/200799470[AWS Marketplace documentation^].
+
+. When the subscription process is complete, close out of AWS Marketplace without further action. Do not provision the software from AWS Marketplace, as the Partner Solution deploys the AMI for you.
+
+=== Prepare your AWS account
+//_Describe any setup required in the AWS account prior to template launch_
+
+This Partner Solution requires:
+
+* The appropriate permission in AWS to launch AWS CloudFormation templates. You must be an IAM user with the Administrator Access policy attached and have permission to create the objects contained in this Partner Solution, including VPCs, Elastic IP addresses, EC2 instances, IAM roles and Instance Profiles, SSE-S3 encrypted S3 buckets, SSH Key Pairs, AWS Secrets Manager secrets, etc.
+
+* An SSH key pair in AWS for management access to {partner-product-short-name}. For more information about creating and/or importing the key pair in AWS, refer to https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html[Amazon EC2 key pairs and Linux instances^]. If one is not specified, one will be created for you named `BigIpSshKeyPair`.
+
+* An AWS secret stored in https://aws.amazon.com/secrets-manager/[AWS Secrets Manager^] with the password used to access and cluster the HA pair. If you don't specify a secret, the solution creates one named `BigIpSecret` with an auto-generated password. To obtain the secret value, run the https://docs.aws.amazon.com/cli/latest/reference/secretsmanager/get-secret-value.html[get-secret-value^] AWS Command Line Interface (AWS CLI) command, changing the Region and secret name as needed:
+
+    aws secretsmanager get-secret-value --secret-id BigIpSecret --query "SecretString" --output text --region us-east-1
+
+For more information, refer to the https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html[AWS Secrets Manager documentation^].
+
+To update the password to your organization's policy or requirements, refer to:
+* https://support.f5.com/csp/article/K13121[K13121: Changing system maintenance account passwords^].
+* https://support.f5.com/csp/article/K15497[K15497: Configuring a secure password policy for the BIG-IP system^].
+
+
+
+
+//==== Prepare your {partner-company-name} account
+//_Describe any setup required in the partner portal/account prior to template launch_
+
+
+==== Configuration notes ====
+
+The Partner Solution template provides an initial deployment for an infrastructure use case, which means that it doesn't support managing the entire deployment exclusively via the template's update-stack feature.
++
+This Partner Solution uses the `cloud-init` package to send the instance user data, which is only used to provide an initial {partner-product-short-name} configuration and not as the primary configuration API for a long-running platform. You can use the update-stack feature to update certain cloud resources, however the {partner-product-short-name} configuration needs to align with cloud resources such as IPs and NICs. Therefore, updating one resource without the other can result in inconsistent states, while updating other resources, like the *bigIpImageId* or *bigIpInstanceType* parameters, can trigger an entire instance re-deloyment.
++
+For example, to upgrade software versions, traditional in-place upgrades and configuration management are required. For details, refer to the link:#_support[Support] section.
+
+This solution requires {partner-product-short-name} to have internet access to download the required software packages. If you are deploying this solution in a private subnet, configure a NAT gateway or instance to allow {partner-product-short-name} to access the internet. See the
+link:#_security[Security] section for more information.
+
+This solution uses https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/[Cloud Failover Extension (CFE)^] to provide failover functionality. By default, this solution creates an S3 bucket for the F5 Cloud Failover Extension (CFE). The bucket is configured with AWS SSE-S3 encryption enabled, and the IAM role is set to enforce AES256 encryption. For more information, refer to:
+
+* https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingServerSideEncryption.html[Using server-side encryption with Amazon S3-managed encryption keys (SSE-S3)^]
+* https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/userguide/aws.html#aws-define-storage[Define the Storage Account in AWS^]
+
+This template can send non-identifiable statistical information to F5 Networks to help improve templates. You can disable this functionality for this deployment by setting the the value of the **allowUsageAnalytics** input parameter to **false**, or you can disable it system-wide by setting the **autoPhonehome** system class property value to to **false** in the F5 Declarative Onboarding declaration. For more information, refer to the next section and also the link:#_security[Security] section.
+
+=== Customize the {partner-product-short-name} configuration
+
+If needed, customize the {partner-product-short-name} configuration. The initial {partner-product-short-name} configurations are passed through the https://github.com/f5networks/f5-bigip-runtime-init[F5 BIG-IP Runtime Init^] configuration files. These files are the primary mechanisms to customize the initial {partner-product-short-name} configurations for your deployment. They also allow for large amounts of {partner-product-short-name} customizations. Customizing the {partner-product-short-name} configurations generally involves updating and rehosting these files and passing their location through the *bigIpRuntimeInitConfig* template parameters.
+
+By default, the Partner Solution deploys a minimal 2NIC PAYG configuration into the default Partner Solution network topology using the following configuration files in this repo's https://github.com/aws-quickstart/quickstart-f5-big-ip-virtual-edition-ha/tree/main/declarations[/declarations^] folder:
+
+** `runtime-init-conf-2nic-payg-instance01.yaml`
+** `runtime-init-conf-2nic-payg-instance02.yaml`
+
+A minimal baseline HA failover cluster is deployed. No virtual services are provisioned.
+
+Optionally, you can deploy an example web application firewall (WAF)-protected web service to illustrate how services work. The example application deploys web application instances and a WAF-protected virtual service on the {partner-product-short-name} instances. To deploy the example application, set the *provisionExampleApp* parameter to *true* and reference the following configuration files via the *bigIpRuntimeInitConfig* parameters:
+
+** `runtime-init-conf-2nic-payg-instance01-with-app.yaml`
+** `runtime-init-conf-2nic-payg-instance02-with-app.yaml`
+
+If your deployment requires additional customizations, update and rehost your configuration files at a custom URL.
+
+NOTE: *IMPORTANT* If hosting on GitHub, URLs that point to GitHub must use the raw file format (for example, `raw.githubusercontent.com`).
+
+The {partner-product-short-name} configurations must match the external environment in which they are deployed. Although the provided runtime-init configuration examples extract and templatize many common values, some values are still hard-coded and must be updated to match your specific environment or deployment first.
+
+==== Common customization example 1
+
+To deploy a Bring Your Own License (BYOL) instance, perform these steps:
+
+[arabic]
+. Edit or modify the Declarative Onboarding (DO) declaration in a
+corresponding example `byol` runtime-init configuration file with the new `regKey`
+value.
+
+Example snippet:
+
+From:
+[source,yaml]
+----
+...
+          My_License:
+            class: License
+            licenseType: regKey
+            regKey: REPLACE_WITH_VALID_REGKEY
+...
+----
+
+To:
+[source,yaml]
+----
+...
+          My_License:
+            class: License
+            licenseType: regKey
+            regKey: AAAAA-BBBBB-CCCCC-DDDDD-EEEEEEE
+...
+----
+
+[arabic, start=2]
+. Publish or host the customized runtime-init configuration file at a location
+that can be accessed by {partner-product-short-name} at deployment time (for example, Git, S3, etc.).
+. Update the *bigIpRuntimeInitConfig* input parameters to reference the
+new URLs of the updated configurations.
+. Update the *bigIpImageId* input parameter to a valid BYOL image ID.
+
+{empty} +
+
+==== Common customization example 2
+
+If you want to change host names, perform these steps to disable usage reporting to the {partner-product-short-name} NTP and DNS servers, etc.:
+
+[arabic]
+. Edit or modify the DO declaration in a
+corresponding example runtime-init configuration file with the new
+values.
+
+Example snippet:
+
+From:
+[source,yaml]
+----
+...
+          My_System:
+            autoPhonehome: true
+            class: System
+            hostname: "failover01.local"
+...
+          failoverGroup:
+            class: DeviceGroup
+            type: sync-failover
+            members:
+              - failover01.local
+              - failover02.local
+...
+----
+
+To:
+[source,yaml]
+----
+...
+          My_System:
+            autoPhonehome: false
+            class: System
+            hostname: "bigip-cluster-01-a.yourcompany.com"
+...
+          failoverGroup:
+            class: DeviceGroup
+            type: sync-failover
+            members:
+              - bigip-cluster-01-a.yourcompany.com
+              - bigip-cluster-01-b.yourcompany.com
+...
+----
+
+
+[arabic, start=2]
+. Publish or host the customized runtime-init configuration files at a location
+that can be accessed by {partner-product-short-name} at deployment time (for example, Git, S3, etc.).
+. Update the *bigIpRuntimeInitConfig* input parameters to reference the
+new URLs of the updated configurations.
+
+{empty} +
+{empty} +
+
+
+TIP: For additional information and examples, refer to the https://github.com/f5networks/f5-bigip-runtime-init[F5 BIG-IP Runtime Init^] GitHub repository.
+
+{empty} +
+{empty} +

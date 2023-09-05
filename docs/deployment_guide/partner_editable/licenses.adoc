@@ -1,3 +1,15 @@
-// Include details about any licenses and how to sign up. Provide links as appropriate.
+// Include details about the license and how they can sign up. If no license is required, clarify that.
 
-There is no cost to use this Partner Solution, but you will be billed for any AWS services or resources that this Partner Solution deploys. For more information, refer to the https://fwd.aws/rA69w?[AWS Partner Solution General Information Guide^].
+// Or, if the deployment uses an AMI, update this paragraph. If it doesn’t, remove the paragraph.
+The Partner Solution requires a subscription to the Amazon Machine Image (AMI) for {partner-product-name}, which is available from https://aws.amazon.com/marketplace/[AWS Marketplace^].
+
+By default, this Partner Solution deploys https://aws.amazon.com/marketplace/pp/prodview-nlakutvltzij4[F5 BIG-IP BEST with IPI and Threat Campaigns (PAYG, 25Mbps)^] instances.
+
+If you want to deploy other types of {partner-product-short-name} instances, accept the terms for the desired offering and obtain the AMI ID for that offering. For example, to get the list of {partner-product-short-name} AMI IDs in us-east-1, pass the desired AMI ID to the template's *bigIpImageId* parameter.
+
+[source,yaml]
+----
+aws ec2 describe-images --filters 'Name=name,Values=*BIGIP*' --query 'Images[*].[ImageId,Name]' --region us-east-1
+----
+
+If deploying to a production environment, you can use Bring Your Own License (BYOL) instances (for example, https://aws.amazon.com/marketplace/pp/prodview-73utu5c5sfyyc[F5 BIG-IP VE - ALL (BYOL, 2 Boot Locations)^]), which require registration keys. If you don't have registration keys, visit the https://www.f5.com/trials/big-ip-virtual-edition[F5 website^]. Additional pricing, terms, and conditions may apply.

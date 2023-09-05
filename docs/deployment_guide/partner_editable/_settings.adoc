@@ -1,17 +1,14 @@
-:partner-solution-project-name: partner-solution-repo-name
-:partner-solution-github-org: aws-quickstart
-:partner-product-name: Full Product Name
-:partner-product-short-name: Product Name
-:partner-company-name: Example Company Name, Ltd.
-:doc-month: January
-:doc-year: 2023
-:partner-contributors: John Smith, {partner-company-name}
+:partner-solution-project-name: cfn-ps-f5-big-ip-virtual-edition-ha
+:partner-solution-github-org: aws-ia
+:partner-product-name: F5 BIG-IP Virtual Edition
+:partner-product-short-name: BIG-IP VE
+:partner-company-name: F5
+:doc-month: June
+:doc-year: 2022
+:partner-contributors: Alex Applebaum, Greg Crosby, Andrey Kashcheev, Nitin Khanna, Yossi Rosenboim, Michael Shimkus, {partner-company-name}
 // :other-contributors: Akua Mansa, Trek10
-:aws-contributors: Janine Singh, AWS IoT Partner team
-:aws-ia-contributors: Toni Jones, AWS Integration & Automation team
-:deployment_time: 15 minutes
+//:aws-contributors: Janine Singh, AWS IoT Partner team
+:aws-ia-contributors: Andrew Glenn and Troy Ameigh, AWS Integration and Automation team
+:deployment_time: 30 minutes
 :default_deployment_region: us-east-1
 // :private_repo:
-
-
-// For instructions on creating this deployment guide, refer to "Build your AWS Partner Solution documentation" (https://aws-ia-us-west-2.s3.us-west-2.amazonaws.com/docs/content/index.html#/).

@@ -1,6 +1,71 @@
-// Add any unique troubleshooting steps here.
-
 For troubleshooting common Partner Solution issues, refer to the https://fwd.aws/rA69w?[AWS Partner Solution General Information Guide^] and https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html[Troubleshooting CloudFormation^].
 
 // == Resources
-// Uncomment section and add links to any external resources that are specified by the partner.
+// Uncomment section and add links to any external resources that are specified by the partner
+The following issues are most common:
+
+- The entire stack was not created
+- Resource(s) within the stack failed to deploy
+
+If a CloudFormation template in the stack failed, choose the name of the failed stack and then choose *Events*. Check the *Status Reason* column for details about the cause of the failed event.
+
+NOTE: When creating a GitHub issue for a failed template, include as much information as possible from the stack event.
+
+Common causes of deployment failure include:
+
+- Required fields were left empty or contained incorrect values (for example, an input type mismatch, prohibited characters, etc.), causing template validation failure.
+- Insufficient permissions to create the deployment or resources created by a deployment (for example, IAM roles, etc).
+- Resource limitations (for example, exceeded limit of IP addresses or compute resources, etc.).
+- An AWS service issue. To check service health, visit the https://status.aws.amazon.com/[AWS service health dashboard^].
+
+If all stacks were created successfully, but the {partner-product-short-name} or AWS service is unavailable, log in to the {partner-product-short-name} instance via SSH to confirm the {partner-product-short-name} deployment or configuration update was successful. For example, you can check that the startup scripts completed as expected on {partner-product-short-name}. To verify {partner-product-short-name} deployment, perform the following steps:
+
+. Obtain the IP address of the {partner-product-short-name} instance. To learn more, refer to link:#_support[Access the {partner-product-short-name} IP address*].
+. Check the startup script to make sure it was installed/interpolated correctly:
+   ```cat /opt/cloud/instance/user-data.txt```
+. Check the logs (in order of invocation):
+  * cloud-init logs:
+    ** */var/log/boot.log*
+    ** */var/log/cloud-init.log*
+    ** */var/log/cloud-init-output.log*
+  * runtime-init logs:
+    ** */var/log/cloud/startup-script.log*: Contains events that happen prior to running `f5-bigip-runtime-init`. For example, if the files required by the deployment fail to download, those events are logged here.
+    ** */var/log/cloud/bigIpRuntimeInit.log*: Contains events logged by the `f5-bigip-runtime-init` onboarding utility. If the configuration is invalid, causing onboarding to fail, those events are logged here. If deployment is successful, you will see an *All operations completed successfully* event.
+  * Automation tool chain logs:
+    ** */var/log/restnoded/restnoded.log*: Contains events logged by the F5 Automation Toolchain components. If an Automation Toolchain declaration fails to deploy, the details of those events are logged here.
+
+TIP: Search most critical errors first (for example, `egrep -i err /var/log/<Logname>`).
+
+If you can't log in to the {partner-product-short-name} instance, navigate to **EC2 > Instances**, select the check box next to the instance you want to troubleshoot, and then choose *Actions > Monitor and Troubleshoot > Get System Log* or *Get Instance Screenshot* for potential logging to serial console.
+
+[source,shell]
+----
+aws ec2 get-console-output --region ${REGION}  --instance-id <ID>
+----
+
+=== Support
+
+Due to the heavy customization requirements of external cloud resources and {partner-product-short-name} configurations, F5 does not provide technical support for deploying, customizing, or troubleshooting CloudFormation templates. However, the various underlying products and components used in the deployed Partner Solution such as https://clouddocs.f5.com/cloud/public/v1/[BIG-IP Virtual Edition^], https://github.com/F5Networks/f5-bigip-runtime-init[F5 BIG-IP Runtime Init^], https://www.f5.com/pdf/products/automation-toolchain-overview.pdf[F5 Automation Toolchain^] extensions, and https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/[F5 Cloud Failover^] are supported by F5 and can be deployed with other orchestration tools. To learn more, refer to https://www.f5.com/company/policies/support-policies[Support Policies^]. For problems with the templates deployed as-is, report a GitHub issue.
+
+For help with authoring and support for custom templates, engage with https://www.f5.com/services/professional-services[F5 Professional Services^].
+
+
+=== Resources
+//Provide any other information of interest to users, especially focusing on areas where AWS or cloud usage differs from on-premises usage.
+
+//_Add any other details that will help the customer use the software on AWS._
+
+- https://www.f5.com/[F5 website]
+- https://aws.amazon.com/marketplace/pp/prodview-v2lgyijcawiti[F5 BIG-IP Virtual Edition - BEST (PAYG, 25Mbps)]
+- https://aws.amazon.com/marketplace/pp/prodview-73utu5c5sfyyc[F5 BIG-IP VE - ALL (BYOL, 2 Boot Locations)]
+- https://www.f5.com/products/big-ip-services/local-traffic-manager[Local Traffic Manager (LTM)]
+- https://www.f5.com/products/security/advanced-waf[Application Security Manager (ASM)]
+- https://aws.amazon.com/marketplace/pp/prodview-cs4qijwjf3ijs[F5 Advanced WAF with LTM, IPI, and Threat Campaigns (PAYG, 25Mbps)]
+- https://github.com/f5networks/f5-bigip-runtime-init[F5 BIG-IP Runtime Init] - to fetch secrets from cloud vault services
+- https://clouddocs.f5.com/products/extensions/f5-cloud-failover/latest/[F5 Cloud Failover Extension (CFE)] -> for updating cloud resources (IP and route mappings)
+- https://www.f5.com/pdf/products/automation-toolchain-overview.pdf[ F5 Automation Tool Chain]
+*  https://clouddocs.f5.com/products/extensions/f5-declarative-onboarding/latest/[F5 Declarative Onboarding (DO)] - for system onboarding
+*  https://clouddocs.f5.com/products/extensions/f5-appsvcs-extension/latest/[F5 Application Services 3 (AS3)] - declarative virtual service definitions
+*  https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/[F5 Telemetry Streaming (TS)] - for logging and reporting (not deployed by default in this solution )
+* https://github.com/f5devcentral/f5-demo-httpd[Example Application (nginx)]
+- https://www.f5.com/services/certification[F5 Certification]
