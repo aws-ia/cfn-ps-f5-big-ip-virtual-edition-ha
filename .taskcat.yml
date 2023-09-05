@@ -2,7 +2,7 @@ general:
   tags:
     delete: 'True'
 project:
-  name: quickstart-f5-big-ip-virtual-edition-ha
+  name: cfn-ps-f5-big-ip-virtual-edition-ha
   owner: a.kashcheev@f5.com
   regions:
     - ap-northeast-1
