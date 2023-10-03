@@ -1,33 +1,70 @@
+general:
+  tags:
+    delete: 'True'
 project:
-  name: cfn-sample-template
-  owner: quickstart@amazon.com
-  package_lambda: false
+  name: cfn-ps-f5-big-ip-virtual-edition-ha
+  owner: a.kashcheev@f5.com
   regions:
-  - ap-northeast-1
-  - ap-northeast-2
-  - ap-southeast-1
-  - ap-southeast-2
-  - eu-central-1
-  - eu-west-1
-  - sa-east-1
-  - us-east-1
-  - us-west-1
-  - us-west-2
-tests:
-  sample:
-    parameters:
-      Param1: 'Inputs to Stack'
-      # Examples: of other taskcat dynamic input parameters for more into see http://taskcat.io
-      #
-      #      AvailabilityZones: $[taskcat_genaz_3]
-      #      ByteValue: 1
-      #      PasswordA: $[taskcat_genpass_8A]
-      #      PasswordB: $[taskcat_genpass_32S]
-      #      RandomNumber: $[taskcat_random-numbers]
-      #      RandomString: $[taskcat_random-string]
-      #      StackName: TestStack
-      #      UUID: $[taskcat_genuuid]
-      #
-    regions:
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-south-1
+    - ap-southeast-1
+    - ap-southeast-2
+    - ca-central-1
+    - eu-central-1
+    - eu-west-1
+    - us-east-1
     - us-east-2
-    template: templates/another-workload.template.yaml
+    - us-west-1
+    - us-west-2
+  s3_regional_buckets: true
+  tags:
+    delete: 'True'
+tests:
+  f5ve-ha-defaults:
+    parameters:
+      allowUsageAnalytics: 'false'
+      availabilityZones: $[taskcat_genaz_2]
+      bigIpInstanceType: m5.xlarge
+      bigIpRuntimeInitConfig01: https://f5-cft.s3.amazonaws.com/quickstarts-v2/declarations/runtime-init-conf-2nic-payg-instance01.yaml
+      bigIpRuntimeInitConfig02: https://f5-cft.s3.amazonaws.com/quickstarts-v2/declarations/runtime-init-conf-2nic-payg-instance02.yaml
+      bigIpRuntimeInitPackageUrl: https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.5.1/dist/f5-bigip-runtime-init-1.5.1-1.gz.run
+      cfeTag: aws_quickstart_$[taskcat_random-string]
+      keyPairName: override
+      qss3BucketName: $[taskcat_autobucket]
+      qss3BucketRegion: $[taskcat_current_region]
+      remoteAccessCIDR: override
+      restrictedSrcAddressApp: override
+      restrictedSrcAddressMgmt: override
+      secretArn: override
+      uniqueString: $[taskcat_genpass_8]
+    regions:
+      - us-east-1
+    template: templates/main.template.yaml
+  f5ve-ha-with-app:
+    parameters:
+      allowUsageAnalytics: 'false'
+      availabilityZones: $[taskcat_genaz_2]
+      bigIpInstanceType: m5.xlarge
+      bigIpRuntimeInitConfig01: https://f5-cft.s3.amazonaws.com/quickstarts-v2/declarations/runtime-init-conf-2nic-payg-instance01-with-app.yaml
+      bigIpRuntimeInitConfig02: https://f5-cft.s3.amazonaws.com/quickstarts-v2/declarations/runtime-init-conf-2nic-payg-instance02-with-app.yaml
+      bigIpRuntimeInitPackageUrl: https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.5.1/dist/f5-bigip-runtime-init-1.5.1-1.gz.run
+      cfeTag: aws_quickstart_$[taskcat_random-string]
+      keyPairName: override
+      privateSubnet1ASelfAddress: 10.0.11.11
+      privateSubnet2ASelfAddress: 10.0.21.11
+      provisionExampleApp: 'true'
+      publicSubnet1SelfAddress: 10.0.10.11
+      publicSubnet1VipAddress: 10.0.10.101
+      publicSubnet2SelfAddress: 10.0.20.11
+      publicSubnet2VipAddress: 10.0.20.101
+      qss3BucketName: $[taskcat_autobucket]
+      qss3BucketRegion: $[taskcat_current_region]
+      remoteAccessCIDR: override
+      restrictedSrcAddressApp: override
+      restrictedSrcAddressMgmt: override
+      secretArn: override
+      uniqueString: $[taskcat_genpass_8]
+    regions:
+      - us-west-1
+    template: templates/main.template.yaml
